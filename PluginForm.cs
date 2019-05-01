@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace GndAbsPressUpdater
+namespace GroundPressureMonitor
 {
     public partial class PluginForm : Form
     {
@@ -17,9 +17,5 @@ namespace GndAbsPressUpdater
             InitializeComponent();
         }
 
-        private void MEdronicalLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            System.Diagnostics.Process.Start("http://www.edronica.com");
-        }
     }
 }
