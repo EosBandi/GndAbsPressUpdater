@@ -11,14 +11,7 @@ using System.Windows.Forms;
 using SerialPort = MissionPlanner.Comms.SerialPort;
 
 namespace GroundPressureMonitor
-
-{
-    public enum PressureUnitEnum
-    {
-        mbar = 0,
-        Pa = 1,
-    }
-
+{ 
     public class GroundPressureMonitor : Plugin
     {
         public override string Name => "Ground Pressure Monitor";
@@ -31,6 +24,7 @@ namespace GroundPressureMonitor
         const string RefreshConfigKey = "GndPressMonRefresh";
         const string MaxDeltaConfigKey = "GndPressMonMaxDelta";
         const string EnabledConfigKey = "GndPressMonEnabled";
+        const string EnableTrimConfigKey = "GndPressMonEnableTrim";
 
         int mTs = 10;
         public int RefreshTime
@@ -63,6 +57,7 @@ namespace GroundPressureMonitor
         string ComPort { get; set; } = "COM3";
         public bool IsEnabled { get; set; }
         public bool IsConnected { get; set; }
+        public bool TrimEnabled { get; set; }
 
         PluginForm mForm;
 
@@ -104,6 +99,10 @@ namespace GroundPressureMonitor
             {
                 IsEnabled = b;
             }
+            if (bool.TryParse(RestoreOrCreateConfigKey(EnableTrimConfigKey, "true"), out b))
+            {
+                TrimEnabled = b;
+            }
         }
 
         string RestoreOrCreateConfigKey(string key, string defaultValue)
@@ -137,6 +136,7 @@ namespace GroundPressureMonitor
                 Host.config[MaxDeltaConfigKey] = MaxPressureDeltaPa.ToString();
             }
             Host.config[EnabledConfigKey] = IsEnabled.ToString(); //Changed event sets the IsEnabled according to the checkbox.
+            Host.config[EnableTrimConfigKey] = TrimEnabled.ToString(); // Enable barometer sync(trim) when uav is on the ground and disarmed
 
             Host.config.Save();
         }
@@ -151,7 +151,14 @@ namespace GroundPressureMonitor
                 IsEnabled = mForm.mEnabledCheckBox.Checked;
             };
 
-            mForm.mCancelButton.Click += (o, e) =>
+            mForm.mTrimCheckBox.CheckedChanged += (o, e) =>
+            {
+                TrimEnabled = mForm.mTrimCheckBox.Checked;
+                pressureTrim = 0;
+                AddMessage("Ground baro offset zeroed!");
+            };
+
+        mForm.mCancelButton.Click += (o, e) =>
             {
                 mForm.Hide();
             };
@@ -183,7 +190,7 @@ namespace GroundPressureMonitor
             mForm.mUpdatePeriodTextBox.Text = RefreshTime.ToString();
             mForm.mDeltaPressureMax.Text = MaxPressureDeltaPa.ToString();
             mForm.mEnabledCheckBox.Checked = IsEnabled;
-
+            mForm.mTrimCheckBox.Checked = TrimEnabled;
         }
 
         private void ConfigMenu_Click(object sender, EventArgs e)
@@ -256,19 +263,19 @@ namespace GroundPressureMonitor
 
                     if (float.TryParse(response, NumberStyles.Float, CultureInfo.InvariantCulture, out float pressure))
                     {
-                        AddMessage($"Ground pressure read: {pressure}");
                         var currentQNH = MainV2.comPort.GetParam("GND_ABS_PRESS");
-                        var newPressurePa = pressure * 100;
-
-                        //If uav is disarmed and we are below 2 meters, then we calculating trim value to match ground sensor to onboard
-                        if ((!Host.cs.armed) && (Host.cs.alt < 2))
+                        var newPressurePa = (pressure * 100);
+                        AddMessage($"Ground pressure read: {newPressurePa}");
+                        AddMessage($"GND_ABS_PRESS: {currentQNH}");
+                    //If uav is disarmed and we are below 2 meters, then we calculating trim value to match ground sensor to onboard
+                        if ((!Host.cs.armed) && (Host.cs.alt < 2) && TrimEnabled)
                         {
                             pressureTrim = newPressurePa - currentQNH;
-                            AddMessage($"Sensor trim:{pressureTrim}");
-
+                            AddMessage($"Set ground offset:{pressureTrim}");
                         }
                         else
                         {
+                            newPressurePa = newPressurePa - pressureTrim;       //Adjust ground baro measurement with the trim
                             var epsilon = 10;
                             var delta = newPressurePa - currentQNH;
                             var deltaAbs = Math.Abs(delta);
@@ -278,7 +285,6 @@ namespace GroundPressureMonitor
                             }
                             else
                             {
-
                                 if (deltaAbs > MaxPressureDeltaPa)
                                 {
                                     delta = delta > 0 ? MaxPressureDeltaPa : -MaxPressureDeltaPa;

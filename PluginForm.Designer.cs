@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.label1 = new System.Windows.Forms.Label();
             this.mComPortTextBox = new System.Windows.Forms.TextBox();
             this.mSaveButton = new System.Windows.Forms.Button();
@@ -38,6 +39,8 @@
             this.mDeltaPressureMax = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.mCancelButton = new System.Windows.Forms.Button();
+            this.mTrimCheckBox = new System.Windows.Forms.CheckBox();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // label1
@@ -50,6 +53,7 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "COM port:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.toolTip.SetToolTip(this.label1, "Select COM port where your ground barometer is connected");
             // 
             // mComPortTextBox
             // 
@@ -67,6 +71,7 @@
             this.mSaveButton.Size = new System.Drawing.Size(100, 28);
             this.mSaveButton.TabIndex = 2;
             this.mSaveButton.Text = "Save";
+            this.toolTip.SetToolTip(this.mSaveButton, "Save settings and hide this dialog");
             this.mSaveButton.UseVisualStyleBackColor = true;
             // 
             // mMessagesListBox
@@ -80,6 +85,7 @@
             this.mMessagesListBox.Name = "mMessagesListBox";
             this.mMessagesListBox.Size = new System.Drawing.Size(318, 319);
             this.mMessagesListBox.TabIndex = 3;
+            this.toolTip.SetToolTip(this.mMessagesListBox, "Messages from GPM");
             // 
             // mUpdatePeriodTextBox
             // 
@@ -99,6 +105,7 @@
             this.label2.TabIndex = 6;
             this.label2.Text = "Update interval (sec):";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.toolTip.SetToolTip(this.label2, "Update ground pressure at this interval");
             // 
             // mEnabledCheckBox
             // 
@@ -111,6 +118,7 @@
             this.mEnabledCheckBox.Size = new System.Drawing.Size(74, 21);
             this.mEnabledCheckBox.TabIndex = 9;
             this.mEnabledCheckBox.Text = "Enable";
+            this.toolTip.SetToolTip(this.mEnabledCheckBox, "Enable Ground Pressure updates");
             this.mEnabledCheckBox.UseVisualStyleBackColor = true;
             // 
             // mDeltaPressureMax
@@ -131,6 +139,7 @@
             this.label3.TabIndex = 10;
             this.label3.Text = "Max Pressure Delta";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.toolTip.SetToolTip(this.label3, "If pressure difference is greater than this value then do not update");
             // 
             // mCancelButton
             // 
@@ -140,7 +149,23 @@
             this.mCancelButton.Size = new System.Drawing.Size(100, 28);
             this.mCancelButton.TabIndex = 12;
             this.mCancelButton.Text = "Cancel";
+            this.toolTip.SetToolTip(this.mCancelButton, "Do not save settings, Enabled and Trim setting are applied but not saved");
             this.mCancelButton.UseVisualStyleBackColor = true;
+            // 
+            // mTrimCheckBox
+            // 
+            this.mTrimCheckBox.AutoSize = true;
+            this.mTrimCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F);
+            this.mTrimCheckBox.Location = new System.Drawing.Point(13, 124);
+            this.mTrimCheckBox.Margin = new System.Windows.Forms.Padding(4);
+            this.mTrimCheckBox.Name = "mTrimCheckBox";
+            this.mTrimCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.mTrimCheckBox.Size = new System.Drawing.Size(140, 21);
+            this.mTrimCheckBox.TabIndex = 13;
+            this.mTrimCheckBox.Text = "Trim ground baro";
+            this.toolTip.SetToolTip(this.mTrimCheckBox, "Get offset of ground baro when UAV is disarmed an on the ground. This assumes tha" +
+        "t the offset will be linear");
+            this.mTrimCheckBox.UseVisualStyleBackColor = true;
             // 
             // PluginForm
             // 
@@ -148,6 +173,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(380, 566);
             this.ControlBox = false;
+            this.Controls.Add(this.mTrimCheckBox);
             this.Controls.Add(this.mCancelButton);
             this.Controls.Add(this.mDeltaPressureMax);
             this.Controls.Add(this.label3);
@@ -181,5 +207,7 @@
         internal System.Windows.Forms.TextBox mDeltaPressureMax;
         private System.Windows.Forms.Label label3;
         internal System.Windows.Forms.Button mCancelButton;
+        public System.Windows.Forms.CheckBox mTrimCheckBox;
+        private System.Windows.Forms.ToolTip toolTip;
     }
 }
